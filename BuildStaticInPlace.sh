@@ -2,11 +2,9 @@
 
 cd "$BUILT_PRODUCTS_DIR"
 
-for arch in $ARCHS; do
-  out="${WRAPPER_NAME}"/arch_${arch}.a
-  lfl=LINK_FILE_LIST_${CURRENT_VARIANT}_${arch}
-  libtool -static -syslibroot $SDKROOT -L. -filelist "${!lfl}" -o "$out"
+archs=( $ARCHS ) lfls=()
+for v in "${archs[@]/#/LINK_FILE_LIST_${CURRENT_VARIANT}_}"; do
+  lfls+=( -filelist "${!v}" )
 done
 
-lipo -create "${WRAPPER_NAME}"/arch_*.a -output "${EXECUTABLE_PATH}"
-rm "${WRAPPER_NAME}"/arch_*.a
+libtool -static -syslibroot "$SDKROOT" -L. "${lfls[@]}" -o "$EXECUTABLE_PATH"
